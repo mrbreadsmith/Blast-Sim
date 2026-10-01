@@ -131,4 +131,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 .method{margin-top:20px;font-size:13px;color:var(--muted);max-width:80ch;line-height:1.6}
 .method code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;color:var(--soft)}
 footer.foot{margin-top:28px;padding-top:16px;border-top:1px solid var(--line);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;color:var(--muted);font-size:12px}
+.headactions{display:flex;align-items:center;gap:8px}
+button.outline{background:none;border-color:var(--line-2);color:var(--ink);height:32px;padding:0 14px;font-size:12.5px}
+button.outline:hover{border-color:var(--action);color:var(--action)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}

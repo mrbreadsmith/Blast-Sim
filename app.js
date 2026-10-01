@@ -233,6 +233,12 @@ document.querySelectorAll('[data-ps]').forEach(b=>b.addEventListener('click',()=
 $('customBuy').addEventListener('click',()=>{ doBuy(+$('customUsd').value); renderAll(); });
 $('customSell').addEventListener('click',()=>{ doSellUsd(+$('customUsd').value); renderAll(); });
 $('resetBtn').addEventListener('click',()=>{ reset(); renderTables(); });
+const DEFAULTS={supply:1000000000,fee:'0.25',presalePct:40,presaleUsd:20000,lpPct:30,lpUsd:15000,customUsd:2500,pressure:55,avgSize:400,dump:4,speed:4};
+$('resetAllBtn').addEventListener('click',()=>{
+  Object.entries(DEFAULTS).forEach(([id,v])=>{ $(id).value=v; });
+  Object.keys(outs).forEach(id=>{ $(id+'Out').textContent=outs[id]($(id).value); });
+  reset(); setBase('launch'); renderInsights();
+});
 $('autoBtn').addEventListener('click',()=>{ timer? stopAuto() : startAuto(); });
 const outs={pressure:v=>v+'% buys',avgSize:v=>'$'+(+v).toLocaleString(),dump:v=>v+'%',speed:v=>v+' trades/s'};
 Object.keys(outs).forEach(id=>$(id).addEventListener('input',()=>{ $(id+'Out').textContent=outs[id]($(id).value); if(id==='speed'&&timer) startAuto(); }));
