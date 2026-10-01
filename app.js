@@ -94,12 +94,12 @@ function tick(){
   }
   renderAll();
 }
-function startAuto(){ stopAuto(); timer=setInterval(tick, 1000/+$('speed').value); $('autoBtn').textContent='Pause auto market'; }
-function stopAuto(){ if(timer){clearInterval(timer);timer=null;} if($('autoBtn')) $('autoBtn').textContent='Start auto market'; }
+function startAuto(){ stopAuto(); timer=setInterval(tick, 1000/+$('speed').value); $('autoBtn').textContent='Pause auto market'; $('autoBtn').setAttribute('aria-pressed','true'); }
+function stopAuto(){ if(timer){clearInterval(timer);timer=null;} if($('autoBtn')) { $('autoBtn').textContent='Start auto market'; $('autoBtn').setAttribute('aria-pressed','false'); } }
 
 // ---- rendering ----
 function renderSetup(){
-  const segs=[['Presale',cfg.presalePct,'var(--accent)'],['Liquidity',cfg.lpPct,'var(--buy)'],['Team / other',Math.max(0,D.otherPct),'var(--muted)']];
+  const segs=[['Presale',cfg.presalePct,'var(--punch)'],['Liquidity',cfg.lpPct,'var(--curve)'],['Team / other',Math.max(0,D.otherPct),'var(--line-2)']];
   $('allocBar').innerHTML=segs.filter(s=>s[1]>0).map(s=>`<span style="width:${s[1]}%;background:${s[2]}"></span>`).join('');
   $('allocLegend').innerHTML=segs.map(s=>`<span><i style="background:${s[2]}"></i>${s[0]} ${+s[1].toFixed(2)}% · ${fTok(cfg.supply*s[1]/100)}</span>`).join('');
   const ratio=D.presalePrice? D.launchPrice/D.presalePrice:0;
@@ -134,10 +134,11 @@ function renderStats(){
     S('Presale full exit',fUsd(exit.usd),'MC → '+fUsd(priceOf(exit.pool)*cfg.supply)+' ('+fPct(exitMove)+')','down')+
     S('Trades',String(hist.length),fUsd(hist.filter(h=>h.side==='b').reduce((a,h)=>a+h.usd,0))+' bought')+
     S('Sold into pool',fUsd(hist.filter(h=>h.side==='s').reduce((a,h)=>a+h.usd,0)),'traders hold '+fTok(traderBag));
+  const ch=$('charge'); if(ch) ch.style.width=Math.max(0,Math.min(100,Math.log(Math.max(mc,1)/D.launchMc)/Math.log(10)*100))+'%';
   const pill=$('statusPill');
   pill.textContent= hist.length? `${fUsd(mc)} MC · ${fPct(chg)}` : 'Launch state';
-  pill.style.background= chg>0.01?'var(--buy-soft)':chg<-0.01?'var(--sell-soft)':'var(--accent-soft)';
-  pill.style.color= chg>0.01?'var(--buy)':chg<-0.01?'var(--sell)':'var(--accent)';
+  pill.style.background= chg>0.01?'var(--buy-soft)':chg<-0.01?'var(--sell-soft)':'var(--tab-bg)';
+  pill.style.color= chg>0.01?'var(--up)':chg<-0.01?'var(--down)':'var(--tab-ink)';
 }
 function renderLog(){
   const rows=hist.slice(-60).reverse().map(h=>`<tr><td>${h.n}</td><td style="text-align:left"><span class="tag ${h.side}">${h.side==='b'?'BUY':'SELL'}</span></td><td style="font-family:var(--f-body)">${h.who}</td><td>${fUsd(h.usd)}</td><td>${fTok(h.tokens)}</td><td>${fPrice(h.fill)}</td><td>${fUsd(h.mc)}</td><td class="${cls(h.move)}">${fPct(h.move)}</td></tr>`).join('');
@@ -173,7 +174,7 @@ function renderChart(){
   if(n<=160) pts.forEach((p,i)=>{ if(!p.side) return; const x=xs(i), y=ys(p.mc);
     g+= p.side==='b'? `<path d="M${x},${y-9}l4,6h-8z" fill="var(--buy)"/>` : `<path d="M${x},${y+9}l4,-6h-8z" fill="var(--sell)"/>`; });
   g+=`<circle cx="${xs(n-1)}" cy="${ys(last.mc)}" r="4.5" fill="${col}" stroke="var(--panel)" stroke-width="2"/>`;
-  g+=`<line id="xh" x1="0" x2="0" y1="${T}" y2="${H-B}" stroke="var(--muted)" stroke-width="1" visibility="hidden"/><circle id="xd" r="4" fill="var(--accent)" stroke="var(--panel)" stroke-width="2" visibility="hidden"/>`;
+  g+=`<line id="xh" x1="0" x2="0" y1="${T}" y2="${H-B}" stroke="var(--muted)" stroke-width="1" visibility="hidden"/><circle id="xd" r="4" fill="var(--punch)" stroke="var(--panel)" stroke-width="2" visibility="hidden"/>`;
   g+=`<rect x="${L}" y="0" width="${W-L-R}" height="${H}" fill="transparent" id="hit"/>`;
   svg.innerHTML=g; geo={xs,ys,L,R,W,n};
 }
@@ -188,7 +189,7 @@ function chartHover(e){
   xd.setAttribute('cx',x); xd.setAttribute('cy',y); xd.setAttribute('visibility','visible');
   const tip=$('tip'); tip.hidden=false;
   const vs=(p.mc/D.launchMc-1)*100;
-  tip.innerHTML=`<div style="font-family:var(--f-body);font-weight:600">${p.label}</div>MC ${fUsd(p.mc)} <span class="${cls(vs)}">${fPct(vs)}</span><br>Price ${fPrice(p.price)}`;
+  tip.innerHTML=`<div style="font-weight:600">${p.label}</div>MC ${fUsd(p.mc)} <span class="${cls(vs)}">${fPct(vs)}</span><br>Price ${fPrice(p.price)}`;
   const sx=x*(r.width/geo.W), tw=tip.offsetWidth;
   tip.style.left=Math.max(0,Math.min(r.width-tw, sx+12 > r.width-tw ? sx-tw-12 : sx+12))+'px';
   tip.style.top=Math.max(0,y*(r.height/280)-50)+'px';
@@ -218,7 +219,7 @@ function renderInsights(){
   const ratio=D.presaleTokens/D.lpTokens;
   const b5=qBuy(bp,5000,cfg.fee), m5=(priceOf(b5.pool)/D.launchPrice-1)*100;
   $('insights').innerHTML=`
-    <div class="insight"><div class="eyebrow">To double from launch</div><div class="big up">${fUsd(need2)} net buys</div><p>MC ${fUsd(D.launchMc)} → ${fUsd(D.launchMc*2)}. Reaching 10× (${fUsd(D.launchMc*10)}) takes ${fUsd(need10)}. Price grows with the square of the $ in the pool.</p></div>
+    <div class="insight"><div class="eyebrow">To double from launch</div><div class="big up">${fUsd(need2)} net buys</div><p>MC ${fUsd(D.launchMc)} → ${fUsd(D.launchMc*2)}. Reaching 10× (${fUsd(D.launchMc*10)}) takes ${fUsd(need10)}. Price grows with the square of the dollars in the pool.</p></div>
     <div class="insight"><div class="eyebrow">A single $5k buy at open</div><div class="big up">${fPct(m5)}</div><p>Takes MC to ${fUsd(priceOf(b5.pool)*cfg.supply)}. The same $5k sold right after only gets back what the pool gives on the way down, minus fees both ways.</p></div>
     <div class="insight"><div class="eyebrow">Presale overhang</div><div class="big down">${ratio.toFixed(2)}× the pool</div><p>Presale holders own ${fTok(D.presaleTokens)} tokens vs ${fTok(D.lpTokens)} in the pool. If they all sold at open, MC falls to ${fUsd(priceOf(full.pool)*cfg.supply)} (${fPct(fullMove)}) and they pull out ${fUsd(full.usd)}.</p></div>`;
 }
