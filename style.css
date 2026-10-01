@@ -20,7 +20,7 @@ img{max-width:100%}
   color-scheme:dark;
 }
 *{box-sizing:border-box}
-body{background:var(--canvas);color:var(--ink);font-size:14px;line-height:1.45;font-variant-numeric:tabular-nums lining-nums;-webkit-font-smoothing:antialiased}
+body{background:var(--canvas);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.45;font-variant-numeric:tabular-nums lining-nums;-webkit-font-smoothing:antialiased}
 ::selection{background:var(--punch);color:var(--pink-ink)}
 .wrap{max-width:1280px;margin:0 auto;padding-block:0 56px;padding-inline:16px}
 h1,h2,h3{text-wrap:balance;margin:0;font-weight:600}
@@ -38,8 +38,7 @@ h2{font-size:15px}
 .brandbar .tagline{font-size:12px;color:var(--muted)}
 .charge{height:4px;background:var(--curve-track);border-radius:4px;overflow:hidden;margin-top:16px}
 .charge i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--curve),var(--punch));border-radius:0 4px 4px 0;transition:width .26s ease}
-header.top{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between;padding-block:28px 24px;margin-bottom:8px;
-  background:radial-gradient(ellipse at 6% 120%,rgba(255,76,152,.14),transparent 55%)}
+header.top{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between;padding-block:28px 24px;margin-bottom:8px}
 header.top h1{margin-top:8px}
 header.top p{margin:8px 0 0;color:var(--soft);max-width:62ch;line-height:1.55}
 .pill{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:6px;font-size:12.5px;font-weight:600;background:var(--tab-bg);color:var(--tab-ink)}
@@ -53,7 +52,7 @@ header.top p{margin:8px 0 0;color:var(--soft);max-width:62ch;line-height:1.55}
 .fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .field{display:flex;flex-direction:column;gap:5px;min-width:0}
 .field label{font-size:12px;color:var(--muted);font-weight:500}
-input[type=number],select{width:100%;font-variant-numeric:tabular-nums;font-size:13.5px;padding:9px 10px;border:1px solid var(--line);border-radius:6px;background:var(--raised);color:var(--ink);transition:border-color .16s}
+input[type=number],select{width:100%;font-family:var(--f-body);font-variant-numeric:tabular-nums;font-size:13.5px;padding:9px 10px;border:1px solid var(--line);border-radius:6px;background:var(--raised);color:var(--ink);transition:border-color .16s}
 input[type=number]:hover,select:hover{border-color:var(--line-2)}
 input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--punch);outline-offset:2px}
 .alloc{display:flex;height:6px;border-radius:6px;overflow:hidden;margin:18px 0 8px;gap:2px;background:var(--surface)}
@@ -71,7 +70,7 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid 
 /* controls */
 .controls{background:var(--raised);border-radius:6px;padding:12px}
 .btnrow{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
-button{font-size:13px;font-weight:600;border-radius:6px;height:40px;padding:0 8px;cursor:pointer;border:1px solid transparent;color:var(--ink);background:none;
+button{font-family:var(--f-body);font-size:13px;font-weight:600;border-radius:6px;height:40px;padding:0 8px;cursor:pointer;border:1px solid transparent;color:var(--ink);background:none;
   transition:transform .14s,filter .14s,border-color .14s,color .14s,background .14s}
 button:active{transform:scale(.97)}
 button.buy{background:var(--action);color:#271720}
@@ -103,7 +102,7 @@ button.ghost:hover{color:var(--ink)}
 .stat .s.up,.up{color:var(--up)} .stat .s.down,.down{color:var(--down)}
 .chartbox{position:relative}
 #chart{display:block;width:100%;height:280px}
-#chart text{font-size:10.5px;fill:var(--muted);font-variant-numeric:tabular-nums}
+#chart text{font-family:var(--f-body);font-size:10.5px;fill:var(--muted);font-variant-numeric:tabular-nums}
 .tip{position:absolute;pointer-events:none;background:var(--raised);border:1px solid var(--line-2);border-radius:6px;padding:7px 10px;font-size:12px;line-height:1.5;box-shadow:0 8px 24px rgba(0,0,0,.4);white-space:nowrap;z-index:2}
 .tablewrap{overflow-x:auto;max-width:100%}
 table{border-collapse:collapse;width:100%;font-size:13px}
