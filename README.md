@@ -1,6 +1,6 @@
-# Blast Sim
+# Blast.Fun Presale Simulator
 
-An interactive token launch simulator for Sui. Model a presale plus a Cetus liquidity pool, push buys and sells through the pool, and see how price and market cap move.
+An interactive presale simulator for launches on Sui, styled to the BLAST brand guidelines. Model a presale plus a DEX liquidity pool, push buys and sells through the pool, and see how price and market cap move.
 
 It runs entirely in the browser. There is no build step, no backend and no wallet connection.
 
@@ -19,7 +19,7 @@ It runs entirely in the browser. There is no build step, no backend and no walle
 |---|---|
 | Total supply | 1,000,000,000 |
 | Presale | 40% for $20,000 |
-| Liquidity | 30% of supply + $15,000, Cetus pool |
+| Liquidity | 30% of supply + $15,000, DEX pool |
 | Team / other | 30% |
 | Launch price | $0.00005 |
 | Launch market cap | $50,000 |
@@ -49,12 +49,12 @@ price = usd / tokens = usd² / k
 - **Sell t tokens:** `tokens' = tokens + t·(1−fee)`, `usd' = k / tokens'`, $ out = `usd − usd'`
 - **Net $ to reach price p:** `(√(k·p) − usd) / (1−fee)`
 
-The fee is taken from the trade input and paid to the LP position rather than added to pool depth, which is how Cetus CLMM fees work. Market cap means fully diluted value (price × total supply).
+The fee is taken from the trade input and paid to the LP position rather than added to pool depth, which is how concentrated-liquidity DEXs on Sui handle fees. Market cap means fully diluted value (price × total supply).
 
 ### Limitations
 
-- A concentrated Cetus range (not full range) moves less per dollar inside the range and runs out of liquidity past its edges. This isn't modelled yet.
-- The $ side is treated as stable, so SUI/USD moves are ignored.
+- A concentrated DEX range (not full range) moves less per dollar inside the range and runs out of liquidity past its edges. This isn't modelled yet.
+- The $ side is treated as stable, so Sui/USD moves are ignored.
 - MEV, sniping bots, other pools and arbitrage are not modelled.
 
 This is a planning tool, not financial advice.
