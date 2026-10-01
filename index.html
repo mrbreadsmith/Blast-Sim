@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Blast Sim: interactive constant-product (x*y=k) pool simulator for token launches with a presale and a Cetus liquidity pool on Sui.">
+<title>Blast Sim</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">SUI · Cetus full-range pool · x·y=k</div>
+      <h1>Blast Sim</h1>
+      <p>Presale 40% for $20k, then $15k plus 30% of supply seeded as liquidity. Push buys and sells through the pool and watch market cap react, or let the auto-market run.</p>
+    </div>
+    <span class="pill" id="statusPill">Launch state</span>
+  </header>
+
+  <div class="grid">
+    <!-- LEFT: controls -->
+    <div class="col">
+      <section class="panel">
+        <h2>Launch setup <span class="muted" style="font-size:12px;font-weight:400;font-family:var(--f-body)">edits restart the sim</span></h2>
+        <div class="fields">
+          <div class="field"><label for="supply">Total supply</label><input id="supply" type="number" min="1" step="1000000" value="1000000000"></div>
+          <div class="field"><label for="fee">Pool fee %</label>
+            <select id="fee"><option value="0.01">0.01%</option><option value="0.05">0.05%</option><option value="0.25" selected>0.25%</option><option value="1">1%</option></select></div>
+          <div class="field"><label for="presalePct">Presale % of supply</label><input id="presalePct" type="number" min="0" max="100" step="1" value="40"></div>
+          <div class="field"><label for="presaleUsd">Presale raise ($)</label><input id="presaleUsd" type="number" min="0" step="500" value="20000"></div>
+          <div class="field"><label for="lpPct">Liquidity % of supply</label><input id="lpPct" type="number" min="0.1" max="100" step="1" value="30"></div>
+          <div class="field"><label for="lpUsd">Liquidity pair ($)</label><input id="lpUsd" type="number" min="1" step="500" value="15000"></div>
+        </div>
+        <div class="alloc" id="allocBar" aria-hidden="true"></div>
+        <div class="legend" id="allocLegend"></div>
+        <div class="derived" id="derived"></div>
+        <div id="setupNote"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Trade</h2>
+        <div class="rowlabel" style="margin-top:0">Buy with $</div>
+        <div class="btnrow">
+          <button class="buy" data-buy="500">+$500</button><button class="buy" data-buy="1000">+$1k</button>
+          <button class="buy" data-buy="5000">+$5k</button><button class="buy" data-buy="10000">+$10k</button>
+        </div>
+        <div class="rowlabel">Sell for $</div>
+        <div class="btnrow">
+          <button class="sell" data-sell="500">−$500</button><button class="sell" data-sell="1000">−$1k</button>
+          <button class="sell" data-sell="5000">−$5k</button><button class="sell" data-sell="10000">−$10k</button>
+        </div>
+        <div class="rowlabel">Presale holders sell % of their bag</div>
+        <div class="btnrow">
+          <button class="sell" data-ps="10">10%</button><button class="sell" data-ps="25">25%</button>
+          <button class="sell" data-ps="50">50%</button><button class="sell" data-ps="100">All</button>
+        </div>
+        <div class="rowlabel">Custom amount ($)</div>
+        <div class="custom">
+          <input id="customUsd" type="number" min="1" step="100" value="2500" aria-label="Custom trade size in dollars">
+          <button class="buy" id="customBuy">Buy</button><button class="sell" id="customSell">Sell</button>
+        </div>
+        <div class="autorow"><button class="ghost" id="resetBtn">Reset to launch</button></div>
+      </section>
+
+      <section class="panel">
+        <h2>Auto market</h2>
+        <div class="slider"><label for="pressure">Buy pressure</label><output id="pressureOut">55% buys</output><input id="pressure" type="range" min="10" max="90" value="55"></div>
+        <div class="slider"><label for="avgSize">Average trade size</label><output id="avgSizeOut">$400</output><input id="avgSize" type="range" min="50" max="3000" step="50" value="400"></div>
+        <div class="slider"><label for="dump">Presale seller chance per trade</label><output id="dumpOut">4%</output><input id="dump" type="range" min="0" max="30" value="4"></div>
+        <div class="slider"><label for="speed">Speed</label><output id="speedOut">4 trades/s</output><input id="speed" type="range" min="1" max="20" value="4"></div>
+        <div class="autorow"><button class="primary" id="autoBtn">Start auto market</button></div>
+        <p class="muted" style="font-size:12px;margin:10px 0 0">Trade sizes are random around the average (a few whales, many small fills). A presale seller dumps 5–25% of the remaining presale bag.</p>
+      </section>
+    </div>
+
+    <!-- RIGHT: live readout -->
+    <div class="col">
+      <div class="stats" id="stats"></div>
+
+      <section class="panel">
+        <h2>Market cap over trades <span class="muted" style="font-size:12px;font-weight:400;font-family:var(--f-body)">▲ buy · ▼ sell · dashed = launch</span></h2>
+        <div class="chartbox" id="chartbox">
+          <svg id="chart" role="img" aria-label="Market cap after each trade"></svg>
+          <div class="tip" id="tip" hidden></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Trade log <span class="muted" style="font-size:12px;font-weight:400;font-family:var(--f-body)" id="logCount"></span></h2>
+        <div class="tablewrap log">
+          <table>
+            <thead><tr><th>#</th><th style="text-align:left">Side</th><th>Who</th><th>USD</th><th>Tokens</th><th>Fill price</th><th>MC after</th><th>Move</th></tr></thead>
+            <tbody id="logBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="insights" id="insights"></div>
+
+  <div class="tablehead">
+    <div><h2 style="font-size:20px">Price impact tables</h2><div class="muted" style="font-size:13px">Each row is one trade on its own, not stacked.</div></div>
+    <div class="seg" role="group" aria-label="Table baseline">
+      <button id="baseLaunch" aria-pressed="true">From launch</button><button id="baseNow" aria-pressed="false">From current pool</button>
+    </div>
+  </div>
+  <div class="tables">
+    <section class="panel"><h2>Single buy</h2><div class="tablewrap"><table><thead><tr><th>Buy</th><th>Tokens out</th><th>% supply</th><th>Avg fill</th><th>MC after</th><th>Move</th></tr></thead><tbody id="tBuy"></tbody></table></div></section>
+    <section class="panel"><h2>Single sell</h2><div class="tablewrap"><table><thead><tr><th>Sell for</th><th>Tokens in</th><th>% supply</th><th>Avg fill</th><th>MC after</th><th>Move</th></tr></thead><tbody id="tSell"></tbody></table></div></section>
+    <section class="panel"><h2>Road to market cap</h2><p class="sub">Net buying needed (buys minus sells) to reach each MC.</p><div class="tablewrap"><table><thead><tr><th>Target MC</th><th>Price</th><th>Net $ in</th><th>Pool $ then</th><th>× vs base</th></tr></thead><tbody id="tRoad"></tbody></table></div></section>
+    <section class="panel"><h2>Presale unlock</h2><p class="sub">Presale holders selling part of their remaining bag in one go.</p><div class="tablewrap"><table><thead><tr><th>Sold</th><th>Tokens</th><th>$ out</th><th>Their ROI</th><th>MC after</th><th>Move</th></tr></thead><tbody id="tPresale"></tbody></table></div></section>
+  </div>
+
+  <p class="method">Model: a full-range constant-product pool, <code>tokens × usd = k</code>, so <code>price = usd / tokens = usd² / k</code>. The fee is taken from the trade input and paid out to the LP position rather than added to pool depth, the way Cetus CLMM fees work. Market cap here is fully diluted (price × total supply). A Cetus position set to a narrow range instead of full range would move less per dollar inside that range and run out of liquidity past its edge. The sim ignores MEV, other pools and the SUI/USD price itself: the $ side is treated as a stable value.</p>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
